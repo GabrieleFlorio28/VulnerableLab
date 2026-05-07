@@ -1,0 +1,1 @@
+-- placeholder SQL seed (not used by sample app which uses sqlite in Python)
