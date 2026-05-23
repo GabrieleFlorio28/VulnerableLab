@@ -1,8 +1,145 @@
 from flask import Flask, request, g
+from html import escape
 import sqlite3
 
 app = Flask(__name__)
 DATABASE = 'data.db'
+
+
+def render_page(title, eyebrow, headline, description, body_html, footer_html=''):
+    return f'''<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{escape(title)}</title>
+    <style>
+        :root {{
+            --bg1: #0f172a;
+            --bg2: #111827;
+            --card: rgba(15, 23, 42, 0.82);
+            --border: rgba(148, 163, 184, 0.22);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent2: #22c55e;
+        }}
+        * {{ box-sizing: border-box; }}
+        body {{
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, Segoe UI, Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 34%),
+                linear-gradient(135deg, var(--bg1), var(--bg2));
+            display: grid;
+            place-items: center;
+            padding: 32px;
+        }}
+        .panel {{
+            width: min(880px, 100%);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }}
+        .hero {{
+            padding: 28px 32px 20px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(34, 197, 94, 0.08));
+        }}
+        .eyebrow {{
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.14);
+            color: #bfdbfe;
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }}
+        h1 {{ margin: 14px 0 8px; font-size: 34px; line-height: 1.1; }}
+        .desc {{ margin: 0; color: var(--muted); max-width: 64ch; line-height: 1.6; }}
+        .content {{ padding: 30px 32px 32px; }}
+        .card {{
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: rgba(15, 23, 42, 0.55);
+            padding: 22px;
+            margin-bottom: 18px;
+        }}
+        .card h2 {{ margin: 0 0 12px; font-size: 18px; }}
+        .row {{ display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }}
+        .btn {{
+            display: inline-block;
+            text-decoration: none;
+            border: 0;
+            border-radius: 12px;
+            padding: 11px 16px;
+            font-weight: 700;
+            color: #04111f;
+            background: linear-gradient(135deg, #67e8f9, #34d399);
+            box-shadow: 0 10px 22px rgba(34, 197, 94, 0.18);
+        }}
+        .btn.secondary {{
+            color: var(--text);
+            background: rgba(148, 163, 184, 0.12);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }}
+        .input {{
+            width: 100%;
+            padding: 12px 14px;
+            margin: 8px 0 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(2, 6, 23, 0.65);
+            color: var(--text);
+            outline: none;
+        }}
+        .note {{ color: var(--muted); font-size: 14px; line-height: 1.6; }}
+        .badge {{
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            color: #d1fae5;
+            background: rgba(34, 197, 94, 0.14);
+            font-size: 12px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }}
+        pre {{
+            margin: 0;
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(2, 6, 23, 0.72);
+            border: 1px solid var(--border);
+            overflow: auto;
+            color: #e0f2fe;
+            line-height: 1.6;
+        }}
+        .footer {{ padding: 0 32px 28px; color: var(--muted); font-size: 13px; }}
+        .grid {{ display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }}
+        .result {{ padding: 14px 16px; border-radius: 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.24); }}
+    </style>
+</head>
+<body>
+    <main class="panel">
+        <section class="hero">
+            <span class="eyebrow">{escape(eyebrow)}</span>
+            <h1>{escape(headline)}</h1>
+            <p class="desc">{escape(description)}</p>
+        </section>
+        <section class="content">
+            {body_html}
+        </section>
+        {f'<div class="footer">{footer_html}</div>' if footer_html else ''}
+    </main>
+</body>
+</html>'''
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -19,7 +156,21 @@ def close_connection(exception):
 
 @app.route('/')
 def index():
-    return 'Vulnerable Lab - SQL Injection example'
+    body = '''<div class="grid">
+        <div class="card">
+            <div class="badge">Scenario 01</div>
+            <h2>Vulnerable search endpoint</h2>
+            <p class="note">This page demonstrates a SQL injection flaw caused by direct concatenation of user input into the query.</p>
+        </div>
+        <div class="card">
+            <div class="badge">Quick actions</div>
+            <div class="row">
+                <a class="btn" href="/init">Initialize database</a>
+                <a class="btn secondary" href="/search?q=alice">Search alice</a>
+            </div>
+        </div>
+    </div>'''
+    return render_page('Vulnerable Lab - SQL Injection', 'SQL Injection', 'Search endpoint with unsafe query building', 'A minimal Flask app with an intentionally vulnerable search endpoint.', body, 'Open /init first, then use /search to inspect the results.')
 
 @app.route('/init')
 def init():
@@ -30,7 +181,16 @@ def init():
     c.executemany('INSERT INTO users (username) VALUES (?)', [('alice',), ('bob',), ('admin',)])
     db.commit()
     db.close()
-    return 'initialized'
+    body = '''<div class="card">
+        <div class="badge">Database ready</div>
+        <h2>SQLite database initialized</h2>
+        <p class="note">The <code>users</code> table has been created and populated with sample records for the lab.</p>
+        <div class="row">
+            <a class="btn" href="/search?q=alice">Go to search</a>
+            <a class="btn secondary" href="/">Back to overview</a>
+        </div>
+    </div>'''
+    return render_page('SQL Injection - Database initialized', 'SQL Injection', 'Database initialization complete', 'The sample data is now available for the search endpoint.', body, 'This screen works well as a browser screenshot for the implementation chapter.')
 
 @app.route('/search')
 def search():
@@ -40,7 +200,19 @@ def search():
     # QUERY VULNERABILE: concatenazione diretta dell'input
     cur.execute(f"SELECT id, username FROM users WHERE username LIKE '%{q}%'")
     rows = cur.fetchall()
-    return '<br>'.join([f"{r[0]} - {r[1]}" for r in rows])
+    results = ''.join([f'<div class="result">{escape(str(r[0]))} - {escape(r[1])}</div>' for r in rows])
+    if not results:
+        results = '<div class="result">No results found.</div>'
+    body = f'''<div class="card">
+        <div class="badge">Query results</div>
+        <h2>Search term: <code>{escape(q)}</code></h2>
+        <div class="grid">{results}</div>
+    </div>
+    <div class="row">
+        <a class="btn" href="/init">Reinitialize database</a>
+        <a class="btn secondary" href="/">Back to overview</a>
+    </div>'''
+    return render_page('SQL Injection - Search results', 'SQL Injection', 'Search output', 'The query is executed with direct string concatenation, which makes the endpoint vulnerable.', body, 'Try a normal search like alice for the clean screenshot, then use an altered input to demonstrate the flaw.')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
