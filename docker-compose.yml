@@ -7,4 +7,30 @@ services:
       - ./sql-injection:/app
     restart: unless-stopped
 
+  broken-auth:
+    build: ./broken-auth
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./broken-auth:/app
+    restart: unless-stopped
+
+  privilege-escalation:
+    build: ./privilege-escalation
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./privilege-escalation:/app
+    restart: unless-stopped
+
+  misconfiguration:
+    build: ./misconfiguration
+    ports:
+      - "5003:5000"
+    environment:
+      - DEBUG_MODE=true
+    volumes:
+      - ./misconfiguration:/app
+    restart: unless-stopped
+
 # altri scenari possono essere aggiunti come servizi separati
