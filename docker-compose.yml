@@ -1,4 +1,4 @@
- services:
+services:
   sql-injection:
     build: ./sql-injection
     ports:
@@ -6,6 +6,8 @@
     volumes:
       - ./sql-injection:/app
     restart: unless-stopped
+    networks:
+      - sql_net
 
   broken-auth:
     build: ./broken-auth
@@ -14,6 +16,8 @@
     volumes:
       - ./broken-auth:/app
     restart: unless-stopped
+    networks:
+      - auth_net
 
   privilege-escalation:
     build: ./privilege-escalation
@@ -22,6 +26,8 @@
     volumes:
       - ./privilege-escalation:/app
     restart: unless-stopped
+    networks:
+      - priv_net
 
   misconfiguration:
     build: ./misconfiguration
@@ -32,5 +38,13 @@
     volumes:
       - ./misconfiguration:/app
     restart: unless-stopped
+    networks:
+      - misconf_net
 
 # altri scenari possono essere aggiunti come servizi separati
+
+networks:
+  sql_net:
+  auth_net:
+  priv_net:
+  misconf_net:
