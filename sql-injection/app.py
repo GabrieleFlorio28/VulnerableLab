@@ -15,14 +15,15 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
     <title>{escape(title)}</title>
     <style>
         :root {{
-            --bg1: #0f172a;
-            --bg2: #111827;
-            --card: rgba(15, 23, 42, 0.82);
-            --border: rgba(148, 163, 184, 0.22);
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --accent2: #22c55e;
+            --bg1: #f8fafc;
+            --bg2: #e0f2fe;
+            --card: #ffffff;
+            --surface: #f8fafc;
+            --border: #dbe4ef;
+            --text: #0f172a;
+            --muted: #475569;
+            --accent: #0284c7;
+            --accent2: #16a34a;
         }}
         * {{ box-sizing: border-box; }}
         body {{
@@ -31,7 +32,7 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
             font-family: Inter, Segoe UI, Arial, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 34%),
+                radial-gradient(circle at top, rgba(14, 165, 233, 0.18), transparent 34%),
                 linear-gradient(135deg, var(--bg1), var(--bg2));
             display: grid;
             place-items: center;
@@ -42,20 +43,20 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 24px;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
             overflow: hidden;
         }}
         .hero {{
             padding: 28px 32px 20px;
             border-bottom: 1px solid var(--border);
-            background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(34, 197, 94, 0.08));
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.10), rgba(34, 197, 94, 0.08));
         }}
         .eyebrow {{
             display: inline-block;
             padding: 6px 12px;
             border-radius: 999px;
-            background: rgba(56, 189, 248, 0.14);
-            color: #bfdbfe;
+            background: #e0f2fe;
+            color: #0369a1;
             font-size: 12px;
             letter-spacing: .08em;
             text-transform: uppercase;
@@ -66,7 +67,7 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
         .card {{
             border: 1px solid var(--border);
             border-radius: 18px;
-            background: rgba(15, 23, 42, 0.55);
+            background: var(--surface);
             padding: 22px;
             margin-bottom: 18px;
         }}
@@ -79,13 +80,13 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
             border-radius: 12px;
             padding: 11px 16px;
             font-weight: 700;
-            color: #04111f;
-            background: linear-gradient(135deg, #67e8f9, #34d399);
-            box-shadow: 0 10px 22px rgba(34, 197, 94, 0.18);
+            color: #ffffff;
+            background: linear-gradient(135deg, #0284c7, #16a34a);
+            box-shadow: 0 10px 22px rgba(2, 132, 199, 0.18);
         }}
         .btn.secondary {{
-            color: var(--text);
-            background: rgba(148, 163, 184, 0.12);
+            color: #0f172a;
+            background: #ffffff;
             border: 1px solid var(--border);
             box-shadow: none;
         }}
@@ -95,7 +96,7 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
             margin: 8px 0 14px;
             border-radius: 12px;
             border: 1px solid var(--border);
-            background: rgba(2, 6, 23, 0.65);
+            background: #ffffff;
             color: var(--text);
             outline: none;
         }}
@@ -105,8 +106,8 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
             margin-bottom: 12px;
             padding: 6px 10px;
             border-radius: 999px;
-            color: #d1fae5;
-            background: rgba(34, 197, 94, 0.14);
+            color: #166534;
+            background: #dcfce7;
             font-size: 12px;
             letter-spacing: .06em;
             text-transform: uppercase;
@@ -115,15 +116,15 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
             margin: 0;
             padding: 16px;
             border-radius: 14px;
-            background: rgba(2, 6, 23, 0.72);
+            background: #ffffff;
             border: 1px solid var(--border);
             overflow: auto;
-            color: #e0f2fe;
+            color: #0f172a;
             line-height: 1.6;
         }}
         .footer {{ padding: 0 32px 28px; color: var(--muted); font-size: 13px; }}
         .grid {{ display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }}
-        .result {{ padding: 14px 16px; border-radius: 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.24); }}
+        .result {{ padding: 14px 16px; border-radius: 14px; background: #f0fdf4; border: 1px solid #bbf7d0; }}
     </style>
 </head>
 <body>

@@ -18,25 +18,25 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{escape(title)}</title>
     <style>
-        :root {{ --bg1:#0f172a; --bg2:#111827; --card:rgba(15,23,42,.82); --border:rgba(148,163,184,.22); --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8; --accent2:#22c55e; }}
+        :root {{ --bg1:#f8fafc; --bg2:#e0f2fe; --card:#ffffff; --surface:#f8fafc; --border:#dbe4ef; --text:#0f172a; --muted:#475569; --accent:#0284c7; --accent2:#16a34a; }}
         * {{ box-sizing: border-box; }}
-        body {{ margin:0; min-height:100vh; font-family:Inter, Segoe UI, Arial, sans-serif; color:var(--text); background:radial-gradient(circle at top, rgba(56,189,248,.18), transparent 34%), linear-gradient(135deg, var(--bg1), var(--bg2)); display:grid; place-items:center; padding:32px; }}
-        .panel {{ width:min(880px,100%); background:var(--card); border:1px solid var(--border); border-radius:24px; box-shadow:0 24px 80px rgba(0,0,0,.35); overflow:hidden; }}
-        .hero {{ padding:28px 32px 20px; border-bottom:1px solid var(--border); background:linear-gradient(135deg, rgba(14,165,233,.12), rgba(34,197,94,.08)); }}
-        .eyebrow {{ display:inline-block; padding:6px 12px; border-radius:999px; background:rgba(56,189,248,.14); color:#bfdbfe; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }}
+        body {{ margin:0; min-height:100vh; font-family:Inter, Segoe UI, Arial, sans-serif; color:var(--text); background:radial-gradient(circle at top, rgba(14,165,233,.18), transparent 34%), linear-gradient(135deg, var(--bg1), var(--bg2)); display:grid; place-items:center; padding:32px; }}
+        .panel {{ width:min(880px,100%); background:var(--card); border:1px solid var(--border); border-radius:24px; box-shadow:0 22px 60px rgba(15,23,42,.12); overflow:hidden; }}
+        .hero {{ padding:28px 32px 20px; border-bottom:1px solid var(--border); background:linear-gradient(135deg, rgba(14,165,233,.10), rgba(34,197,94,.08)); }}
+        .eyebrow {{ display:inline-block; padding:6px 12px; border-radius:999px; background:#e0f2fe; color:#0369a1; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }}
         h1 {{ margin:14px 0 8px; font-size:34px; line-height:1.1; }}
         .desc {{ margin:0; color:var(--muted); max-width:64ch; line-height:1.6; }}
         .content {{ padding:30px 32px 32px; }}
-        .card {{ border:1px solid var(--border); border-radius:18px; background:rgba(15,23,42,.55); padding:22px; margin-bottom:18px; }}
+        .card {{ border:1px solid var(--border); border-radius:18px; background:var(--surface); padding:22px; margin-bottom:18px; }}
         .card h2 {{ margin:0 0 12px; font-size:18px; }}
         .row {{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }}
-        .btn {{ display:inline-block; text-decoration:none; border:0; border-radius:12px; padding:11px 16px; font-weight:700; color:#04111f; background:linear-gradient(135deg, #67e8f9, #34d399); box-shadow:0 10px 22px rgba(34,197,94,.18); }}
-        .btn.secondary {{ color:var(--text); background:rgba(148,163,184,.12); border:1px solid var(--border); box-shadow:none; }}
-        .input {{ width:100%; padding:12px 14px; margin:8px 0 14px; border-radius:12px; border:1px solid var(--border); background:rgba(2,6,23,.65); color:var(--text); outline:none; }}
+        .btn {{ display:inline-block; text-decoration:none; border:0; border-radius:12px; padding:11px 16px; font-weight:700; color:#ffffff; background:linear-gradient(135deg, #0284c7, #16a34a); box-shadow:0 10px 22px rgba(2,132,199,.18); }}
+        .btn.secondary {{ color:#0f172a; background:#ffffff; border:1px solid var(--border); box-shadow:none; }}
+        .input {{ width:100%; padding:12px 14px; margin:8px 0 14px; border-radius:12px; border:1px solid var(--border); background:#ffffff; color:var(--text); outline:none; }}
         .note {{ color:var(--muted); font-size:14px; line-height:1.6; }}
-        .badge {{ display:inline-block; margin-bottom:12px; padding:6px 10px; border-radius:999px; color:#d1fae5; background:rgba(34,197,94,.14); font-size:12px; letter-spacing:.06em; text-transform:uppercase; }}
+        .badge {{ display:inline-block; margin-bottom:12px; padding:6px 10px; border-radius:999px; color:#166534; background:#dcfce7; font-size:12px; letter-spacing:.06em; text-transform:uppercase; }}
         .footer {{ padding:0 32px 28px; color:var(--muted); font-size:13px; }}
-        .result {{ padding:14px 16px; border-radius:14px; background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.24); }}
+        .result {{ padding:14px 16px; border-radius:14px; background:#f0fdf4; border:1px solid #bbf7d0; }}
         form {{ margin: 0; }}
     </style>
 </head>
