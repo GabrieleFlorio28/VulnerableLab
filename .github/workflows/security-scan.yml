@@ -40,8 +40,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install pip-audit
           find . -name "requirements*.txt" -exec pip-audit -r {} + || true
-
- container-scan:
+  
+  container-scan:
     name: Container & IaC Security Scan (Trivy)
     runs-on: ubuntu-latest
     steps:
