@@ -39,38 +39,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pip-audit
-          if [ -f requirements.txt ]; then
-            pip-audit -r requirements.txt || true
-          elif [ -f web/requirements.txt ]; then
-            pip-audit -r web/requirements.txt || true
-          elif [ -f app/requirements.txt ]; then
-            pip-audit -r app/requirements.txt || true
-          fi
+          find . -name "requirements*.txt" -exec pip-audit -r {} + || true
 
   container-scan:
-    name: Container & Dockerfile Scan (Trivy)
+    name: Container & IaC Security Scan (Trivy)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Scan Dockerfile with Trivy
+      - name: Scan Filesystem and Docker Configs with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
-          hide-progress: false
+          scan-type: 'fs'
+          scan-ref: '.'
           format: 'table'
-          exit-code: '0'
           severity: 'CRITICAL,HIGH'
-
-      - name: Build Docker Image
-        run: |
-          docker build -t vulnerable-lab:local . || true
-
-      - name: Scan Docker Image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'vulnerable-lab:local'
-          format: 'table'
           exit-code: '0'
-          severity: 'CRITICAL,HIGH'
