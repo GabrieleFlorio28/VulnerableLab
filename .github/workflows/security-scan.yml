@@ -1,0 +1,116 @@
+name: DevSecOps Security Pipeline
+
+on:
+push:
+branches: [ "main", "master", "develop" ]
+pull_request:
+branches: [ "main", "master" ]
+
+Consente l'attivazione manuale dalla tab Actions su GitHub
+
+workflow_dispatch:
+
+permissions:
+contents: read
+security-events: write
+
+jobs:
+
+-------------------------------------------------------------
+
+Job 1: Secret Scanning con Gitleaks
+
+Scansiona l'intero albero di commit per scovare API keys, token, password
+
+-------------------------------------------------------------
+
+secret-scan:
+name: Secret Scanning (Gitleaks)
+runs-on: ubuntu-latest
+steps:
+- name: Checkout del codice
+uses: actions/checkout@v4
+with:
+fetch-depth: 0 # Necessario per scansionare tutta la cronologia Git
+
+  - name: Esecuzione Gitleaks
+    uses: gitleaks/gitleaks-action@v2
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITLEAKS_VERBOSE: true
+
+
+-------------------------------------------------------------
+
+Job 2: Software Composition Analysis (SCA) su dipendenze Python
+
+Controlla se le librerie in requirements.txt contengono CVE note
+
+-------------------------------------------------------------
+
+sca-python:
+name: Dependency Scan (pip-audit)
+runs-on: ubuntu-latest
+steps:
+- name: Checkout del codice
+uses: actions/checkout@v4
+
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.11"
+
+  - name: Installazione e scansione con pip-audit
+    run: |
+      python -m pip install --upgrade pip
+      pip install pip-audit
+      if [ -f requirements.txt ]; then
+        pip-audit -r requirements.txt --desc on
+      else
+        echo "Nessun requirements.txt trovato nella root. Verifica il path del file."
+      fi
+
+
+-------------------------------------------------------------
+
+Job 3: Static Analysis & Container Vulnerability Scan con Trivy
+
+1. Scansiona Dockerfile e configurazioni (IaC Misconfigurations)
+
+2. Compila l'immagine Docker
+
+3. Scansiona l'immagine compilata per CVE del sistema operativo e pacchetti
+
+-------------------------------------------------------------
+
+container-security:
+name: Container & Image Scan (Trivy)
+runs-on: ubuntu-latest
+needs: [secret-scan, sca-python] # Esegue solo se i check base passano
+steps:
+- name: Checkout del codice
+uses: actions/checkout@v4
+
+  # Controllo misconfigurazioni IaC (es. root user, flag insicure, porte inutili)
+  - name: Trivy Config & Dockerfile Misconfiguration Scan
+    uses: aquasecurity/trivy-action@master
+    with:
+      scan-type: 'config'
+      scan-ref: '.'
+      severity: 'HIGH,CRITICAL'
+      exit-code: '0' # Non interrompe subito, segnala le criticità
+
+  # Build locale dell'immagine Docker per il test
+  - name: Build dell'immagine Docker Flask
+    run: |
+      docker build -t vulnerablelab-app:local .
+
+  # Scansione dell'immagine Docker compilata
+  - name: Trivy Container Image Scan
+    uses: aquasecurity/trivy-action@master
+    with:
+      image-ref: 'vulnerablelab-app:local'
+      format: 'table'
+      exit-code: '1' # Ritorna exit code 1 e fallisce la pipeline se trova vulnerabilità critiche
+      ignore-unfixed: true
+      severity: 'CRITICAL,HIGH'
