@@ -41,18 +41,19 @@ jobs:
           pip install pip-audit
           find . -name "requirements*.txt" -exec pip-audit -r {} + || true
 
-  container-scan:
+ container-scan:
     name: Container & IaC Security Scan (Trivy)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Scan Filesystem and Docker Configs with Trivy
+      - name: Scan Docker & IaC Misconfigurations with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
+          scan-type: 'config'
           scan-ref: '.'
+          scanners: 'misconfig'
           format: 'table'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL,HIGH,MEDIUM'
           exit-code: '0'
