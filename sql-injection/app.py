@@ -5,6 +5,14 @@ import sqlite3
 app = Flask(__name__)
 DATABASE = 'data.db'
 
+# 1. Iniezione degli Header HTTP di Sicurezza
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline';"
+    return response
+
 
 def render_page(title, eyebrow, headline, description, body_html, footer_html=''):
     return f'''<!doctype html>
@@ -160,8 +168,8 @@ def index():
     body = '''<div class="grid">
         <div class="card">
             <div class="badge">Scenario 01</div>
-            <h2>Vulnerable search endpoint</h2>
-            <p class="note">This page demonstrates a SQL injection flaw caused by direct concatenation of user input into the query.</p>
+            <h2>Hardened search endpoint</h2>
+            <p class="note">This page demonstrates the remediation of SQL injection vulnerabilities using parameterized queries.</p>
         </div>
         <div class="card">
             <div class="badge">Quick actions</div>
@@ -171,7 +179,7 @@ def index():
             </div>
         </div>
     </div>'''
-    return render_page('Vulnerable Lab - SQL Injection', 'SQL Injection', 'Search endpoint with unsafe query building', 'A minimal Flask app with an intentionally vulnerable search endpoint.', body, 'Open /init first, then use /search to inspect the results.')
+    return render_page('Mitigated Lab - SQL Injection', 'SQL Injection Mitigation', 'Search endpoint with parameterized queries', 'A hardened Flask app protecting against SQL injection flaws.', body, 'Open /init first, then use /search to test input handling.')
 
 @app.route('/init')
 def init():
@@ -191,15 +199,17 @@ def init():
             <a class="btn secondary" href="/">Back to overview</a>
         </div>
     </div>'''
-    return render_page('SQL Injection - Database initialized', 'SQL Injection', 'Database initialization complete', 'The sample data is now available for the search endpoint.', body, 'This screen works well as a browser screenshot for the implementation chapter.')
+    return render_page('SQL Injection - Database initialized', 'SQL Injection Mitigation', 'Database initialization complete', 'The sample data is now available.',body,)
 
 @app.route('/search')
 def search():
     q = request.args.get('q', '')
     db = get_db()
     cur = db.cursor()
-    # QUERY VULNERABILE: concatenazione diretta dell'input
-    cur.execute(f"SELECT id, username FROM users WHERE username LIKE '%{q}%'")
+    # QUERY SICURA: prepared statement con wildcard passate nel parametro
+    query = "SELECT id, username FROM users WHERE username LIKE ?"
+    pattern = f"%{q}%"
+    cur.execute(query, (pattern,))
     rows = cur.fetchall()
     results = ''.join([f'<div class="result">{escape(str(r[0]))} - {escape(r[1])}</div>' for r in rows])
     if not results:
@@ -213,7 +223,8 @@ def search():
         <a class="btn" href="/init">Reinitialize database</a>
         <a class="btn secondary" href="/">Back to overview</a>
     </div>'''
-    return render_page('SQL Injection - Search results', 'SQL Injection', 'Search output', 'The query is executed with direct string concatenation, which makes the endpoint vulnerable.', body, 'Try a normal search like alice for the clean screenshot, then use an altered input to demonstrate the flaw.')
+    return render_page('SQL Injection - Search results', 'SQL Injection Mitigation', 'Safe Search output', 'The query executes using prepared statememnts, traeating all input strictly as literal values.', body, 'Payloads like ' OR '1'='1 will now be treated as harmless search strings.')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Disattivato debug=True per evitare esposizione dell'interfaccia Werkzeug
+    app.run(host='0.0.0.0', port=5000, debug=False)
