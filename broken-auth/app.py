@@ -1,13 +1,33 @@
-from flask import Flask, request
+from flask import Flask, request, session, redirect, url_for, render_template, abort
+from werkzeug.security import generate_password_hash, check_password_hash
 from html import escape
+import os
 
 app = Flask(__name__)
 
-# Insecure user store: plaintext passwords and weak verification
+# Chiave segreta forte e casuale (non hardcodata)
+app.secret_key = os.urandom(32)
+
+# Configurazione hardening per i cookie di sessione
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=False  # Impostare a True se esposto dietro terminatore TLS/HTTPS
+)
+
+# Memorizzazione sicura delle credenziali tramite hash salted (nessuna password in chiaro)
 USERS = {
-    'alice': 'password123',
-    'bob': 'qwerty',
+    'alice': generate_password_hash('password123'),
+    'bob': generate_password_hash('qwerty'),
 }
+
+# Iniezione header difensivi a livello HTTP
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline';"
+    return response
 
 
 def render_page(title, eyebrow, headline, description, body_html, footer_html=''):
@@ -56,22 +76,22 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
 @app.route('/')
 def index():
     body = '''<div class="card">
-        <div class="badge">Scenario 02</div>
-        <h2>Broken authentication flow</h2>
-        <p class="note">Credentials are stored in plaintext and the verification logic is intentionally weak to make the flaw visible during the demo.</p>
+        <div class="badge">Scenario 02 - Mitigated</div>
+        <h2>Hardened Authentication Flow</h2>
+        <p class="note">Password hashing via PBKDF2/SHA256, constant-time verification checks, and session cookie protections are active.</p>
         <div class="row">
             <a class="btn" href="/login">Open login page</a>
         </div>
     </div>'''
-    return render_page('Vulnerable Lab - Broken Authentication', 'Broken Authentication', 'Weak login control', 'A deliberately fragile authentication flow for demonstration and testing.', body, 'Open the login form and submit a valid user. The form is styled so the browser screenshot looks cleaner.')
+    return render_page('Mitigated Lab - Broken Authentication - Broken Authentication', 'Authentication Hardening', 'Secure login control', 'A fully remediated authentication pipeline implementing cryptographic hashing.', body, 'Use the login form to test valid versus invalid credentials.')
 
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
         body = '''<div class="card">
-            <div class="badge">Login form</div>
+            <div class="badge">Secure login</div>
             <h2>Authenticate to continue</h2>
-            <p class="note">For the lab, the verification is intentionally flawed so the effect of a weak control can be observed easily.</p>
+            <p class="note">Credentials are matched against secure hashes with timing attack mitigations.</p>
             <form method="post">
                 <label>Username</label>
                 <input class="input" name="username" placeholder="alice">
@@ -83,34 +103,30 @@ def login():
                 </div>
             </form>
         </div>'''
-        return render_page('Broken Authentication - Login', 'Broken Authentication', 'Login form', 'The page is presented in a cleaner layout for the thesis screenshots.', body, 'The vulnerability remains unchanged: the password comparison is still intentionally weak.')
-    username = request.form.get('username','')
+        return render_page('Authentication - Login', 'Authentication Hardening', 'Login form', 'Secure verification flow.', body,)
+    username = request.form.get('username','').strip()
     password = request.form.get('password','')
-    expected = USERS.get(username)
-    if expected is None:
-        body = f'''<div class="card">
-            <div class="badge">Access denied</div>
-            <h2>Invalid user</h2>
-            <p class="note">The username <code>{escape(username)}</code> was not found in the internal store.</p>
-            <div class="row"><a class="btn" href="/login">Back to login</a></div>
-        </div>'''
-        return render_page('Broken Authentication - Invalid user', 'Broken Authentication', 'Authentication failed', 'The supplied user does not exist in the internal list.', body), 401
-    # VULNERABLE CHECK: only compares first three characters -> easy to bypass/brute-force
-    if expected[:3] == password[:3]:
+
+    user_password_hash = USERS.get(username)
+    
+    # Verifica robusta: validazione crittografica e mitigazione di user enumeration
+    if user_password_hash and check_password_hash(user_password_hash, password):
+        session['user'] = username
         body = f'''<div class="card">
             <div class="badge">Access granted</div>
             <h2>Logged in as {escape(username)}</h2>
-            <p class="note">This success is intentional in the lab and highlights the weakness in the comparison logic.</p>
-            <div class="row"><a class="btn" href="/login">Try another login</a></div>
+            <p class="note">Authentication succeeded through cryptographic hash validation.</p>
+            <div class="row"><a class="btn" href="/login">Back to login</a></div>
         </div>'''
-        return render_page('Broken Authentication - Success', 'Broken Authentication', 'Authenticated session', 'The login flow accepted the credentials because the check is intentionally weak.', body)
+        return render_page('Authentication - Success', 'Authentication Hardening', 'Authenticated session', 'The credentials matched the salted cryptographic hash.', body)
+    # Ritorno 401 generico per evitare user enumeration se le credenziali sono errate
     body = f'''<div class="card">
         <div class="badge">Access denied</div>
         <h2>Invalid credentials</h2>
-        <p class="note">The username <code>{escape(username)}</code> was found, but the supplied password did not satisfy the vulnerable check.</p>
+        <p class="note">Invalid username or password provided.</p>
         <div class="row"><a class="btn" href="/login">Back to login</a></div>
     </div>'''
-    return render_page('Broken Authentication - Invalid credentials', 'Broken Authentication', 'Authentication failed', 'The input did not satisfy the deliberately weak check.', body), 401
+    return render_page('Broken Authentication - Access Denied', 'Authentication Hardening', 'Authentication failed', 'Generic error response to prevent user harvesting.', body), 401
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
