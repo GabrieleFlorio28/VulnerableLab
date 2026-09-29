@@ -167,7 +167,7 @@ def close_connection(exception):
 def index():
     body = '''<div class="grid">
         <div class="card">
-            <div class="badge">Scenario 01</div>
+            <div class="badge">Scenario 01 - Mitigated</div>
             <h2>Hardened search endpoint</h2>
             <p class="note">This page demonstrates the remediation of SQL injection vulnerabilities using parameterized queries.</p>
         </div>
