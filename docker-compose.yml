@@ -3,9 +3,11 @@ services:
     build: ./sql-injection
     ports:
       - "5000:5000"
-    volumes:
-      - ./sql-injection:/app
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - sql_net
 
@@ -13,9 +15,11 @@ services:
     build: ./broken-auth
     ports:
       - "5001:5000"
-    volumes:
-      - ./broken-auth:/app
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - auth_net
 
@@ -23,9 +27,11 @@ services:
     build: ./privilege-escalation
     ports:
       - "5002:5000"
-    volumes:
-      - ./privilege-escalation:/app
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - priv_net
 
@@ -34,17 +40,19 @@ services:
     ports:
       - "5003:5000"
     environment:
-      - DEBUG_MODE=true
-    volumes:
-      - ./misconfiguration:/app
+      - DEBUG_MODE=false
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - misconf_net
-
-# altri scenari possono essere aggiunti come servizi separati
 
 networks:
   sql_net:
   auth_net:
+  priv_net:
+  misconf_net:
   priv_net:
   misconf_net:
