@@ -45,6 +45,8 @@ Se il laboratorio e' gia' avviato:
 powershell -ExecutionPolicy Bypass -File .\scripts\test-lab.ps1 -SkipStart
 ```
 
+- `.github/workflows/`: Pipeline CI/CD di security scanning automatizzato (Gitleaks, pip-audit, Trivy).
+
 ## Arresto
 
 ```bash
