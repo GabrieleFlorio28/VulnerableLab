@@ -20,10 +20,10 @@ docker compose up -d --build
 Il comando usa la sintassi di Docker Compose v2 (`docker compose`), integrata nella CLI di Docker. Il file di configurazione mantiene il nome convenzionale `docker-compose.yml`.
 
 Endpoint principali:
-- SQL Injection: `http://localhost:5000/init` e `http://localhost:5000/search?q=alice`
-- Broken Authentication: `http://localhost:5001/login`
-- Accesso improprio a risorsa privilegiata: `http://localhost:5002/read-secret`
-- Misconfiguration: `http://localhost:5003/admin`
+- SQL Injection: http://localhost:5000/init e http://localhost:5000/search?q=alice
+- Broken Authentication: http://localhost:5001/login
+- Accesso improprio a risorsa privilegiata: http://localhost:5002/read-secret
+- Misconfiguration: http://localhost:5003/admin
 
 ## Verifica automatica di base
 
