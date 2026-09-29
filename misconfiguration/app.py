@@ -4,7 +4,16 @@ import os
 
 app = Flask(__name__)
 
-DEBUG_MODE = os.getenv('DEBUG_MODE','false').lower() in ('1','true','yes')
+# Impostazione sicura predefinita: in produzione il debug mode deve rimanere categoricamente disattivato
+DEBUG_MODE = False
+
+# Iniezione header difensivi a livello HTTP
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline';"
+    return response
 
 
 def render_page(title, eyebrow, headline, description, body_html, footer_html=''):
@@ -50,39 +59,31 @@ def render_page(title, eyebrow, headline, description, body_html, footer_html=''
 
 @app.route('/')
 def index():
-    status = 'enabled' if DEBUG_MODE else 'disabled'
     body = f'''<div class="card">
-        <div class="badge">Scenario 04</div>
-        <h2>Application configuration overview</h2>
-        <p class="note">The service is running with <code>DEBUG_MODE={str(DEBUG_MODE).lower()}</code>. In the lab this makes the admin endpoint visible and is used to demonstrate the effect of an insecure deployment setting.</p>
+        <div class="badge">Scenario 04 - Mitigated</div>
+        <h2>Hardened Configuration Posture</h2>
+        <p class="note">Administrative endpoints and debug interfaces are strictly protected and disabled by default in production.</p>
         <div class="row">
-            <a class="btn" href="/admin">Open admin endpoint</a>
+            <a class="btn" href="/admin">Test admin access</a>
         </div>
     </div>
     <div class="card">
-        <h2>Current status</h2>
-        <p class="note">Debug mode is <strong>{escape(status)}</strong> for this scenario.</p>
+        <h2>Runtime status</h2>
+        <p class="note">Debug mode is strictly <strong>disabled</strong>. Error stack traces and Werkzeug debug consoles are inactive.</p>
     </div>'''
-    return render_page('Vulnerable Lab - Misconfiguration', 'Misconfiguration', 'Insecure runtime configuration', 'The service exposes an administrative route because the environment is intentionally misconfigured.', body, 'This screen is useful to show how a deployment setting can change the visible behavior of the application.')
+    return render_page('Mitigated Lab - Misconfiguration', 'Configuration Hardening', 'Hardened runtime configuration', 'Debug flags and administrative routes are secured against unauthorized access.', body, 'Attempting to open /admin will return a 403 Forbidden response.')
 
-# Admin/shutdown endpoint accidentally exposed when DEBUG_MODE is true
+# Endpoint protetto: non espone superfici amministrative basate su flag di runtime deboli
 @app.route('/admin')
 def admin():
-    if not DEBUG_MODE:
-        body = '''<div class="card">
-            <div class="badge">Forbidden</div>
-            <h2>Admin endpoint not available</h2>
-            <p class="note">The route is protected because debug mode is disabled.</p>
-            <div class="row"><a class="btn" href="/">Back to overview</a></div>
-        </div>'''
-        return render_page('Misconfiguration - Forbidden', 'Misconfiguration', 'Access denied', 'The endpoint is unavailable when debug mode is disabled.', body), 403
     body = '''<div class="card">
-        <div class="badge">Admin panel</div>
-        <h2>Exposed due to misconfiguration</h2>
-        <p class="note">This administrative surface is reachable because the service is running with debug mode enabled.</p>
+        <div class="badge">Forbidden</div>
+        <h2>Administrative surface protected</h2>
+        <p class="note">Access denied. Administrative endpoints require explicit mutual authentication or VPN/internal access gates.</p>
         <div class="row"><a class="btn" href="/">Back to overview</a></div>
     </div>'''
-    return render_page('Misconfiguration - Admin panel', 'Misconfiguration', 'Administrative endpoint exposed', 'The endpoint is reachable because the deployment is intentionally misconfigured.', body)
+    return render_page('Configuration Hardening - Forbidden', 'Configuration Hardening', 'Access denied', 'Administrative routes cannot be toggled on via debug flags.', body), 403
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=DEBUG_MODE)
+    # Debug disattivato in modo categorico
+    app.run(host='0.0.0.0', port=5000, debug=False)
