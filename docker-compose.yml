@@ -54,5 +54,4 @@ networks:
   auth_net:
   priv_net:
   misconf_net:
-  priv_net:
-  misconf_net:
+

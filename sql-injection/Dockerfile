@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 3. Copia il codice impostando appuser come proprietario
 COPY --chown=appuser:appgroup . .
+RUN chown -R appuser:appgroup /app
 
 # 4. Esegui il processo come utente non-root
 USER appuser

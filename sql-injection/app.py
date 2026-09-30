@@ -223,7 +223,7 @@ def search():
         <a class="btn" href="/init">Reinitialize database</a>
         <a class="btn secondary" href="/">Back to overview</a>
     </div>'''
-    return render_page('SQL Injection - Search results', 'SQL Injection Mitigation', 'Safe Search output', 'The query executes using prepared statememnts, traeating all input strictly as literal values.', body, 'Payloads like ' OR '1'='1 will now be treated as harmless search strings.')
+    return render_page('SQL Injection - Search results', 'SQL Injection Mitigation', 'Safe Search output', 'The query executes using prepared statememnts, traeating all input strictly as literal values.', body, "Payloads like ' OR '1'='1 will now be treated as harmless search strings.")
 
 if __name__ == '__main__':
     # Disattivato debug=True per evitare esposizione dell'interfaccia Werkzeug
