@@ -1,5 +1,7 @@
 # Vulnerable Lab
 
+[![Gumroad](https://img.shields.io/badge/Gumroad-Field%20Guide%20%26%20Lab%20Bundle-blue?logo=gumroad)](https://floriogabriel.gumroad.com/l/The-Hands-On-Web-and-Container-Security-Field-Guide)
+
 Repository di esempio per il laboratorio didattico "Vulnerable Lab".
 
 Il progetto contiene scenari vulnerabili containerizzati per finalita' didattiche. Gli scenari sono intenzionalmente insicuri e devono essere eseguiti solo in ambiente locale e controllato.
